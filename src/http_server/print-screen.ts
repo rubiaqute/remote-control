@@ -10,5 +10,5 @@ export const printScreen = async () => {
         "height": 200
     })
 
-    return await result.getBase64Async(Jimp.MIME_PNG)
+    return await result.getBase64Async(Jimp.MIME_JPEG)
 };
