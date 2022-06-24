@@ -24,6 +24,7 @@ const wss = new WebSocketServer({ port: 8080 });
 
 wss.on('connection', (ws: WebSocketServer) => {
     const wsStream = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false })
+    wsStream.write(`WS_params:${JSON.stringify(ws._socket.address())}`)
 
     wsStream.on('data', (data: string) => {
         const command = data.split(' ')[0]
@@ -64,46 +65,7 @@ wss.on('connection', (ws: WebSocketServer) => {
         }
     })
 
-    // ws.on('message', (data: Buffer) => {
-    //     pipeline(wsStream, ()=>{})
-    //     console.log(data.toString())
-    //     const command = data.toString().split(' ')[0]
-    //     const distance = +data.toString().split(' ')[1]
-    //     const { x, y } = robot.getMousePos()
-    //     robot.setMouseDelay(100)
 
-    //     switch (command) {
-    //         case 'mouse_up': {
-    //             robot.moveMouseSmooth(x, y - distance);
-    //             const sensStrem =ws.send(`${command}:{${y}px}`);
-    //             break
-    //         }
-    //         case 'mouse_down': {
-    //             robot.moveMouseSmooth(x, y + distance);
-    //             ws.send(`${command}:{${y}px}`);
-    //             break
-    //         }
-    //         case 'mouse_left': {
-    //             robot.moveMouseSmooth(x - distance, y);
-    //             ws.send(`${command}:{${x}px}`);
-    //             break
-    //         }
-    //         case 'mouse_right': {
-    //             robot.moveMouseSmooth(x + distance, y);
-    //             ws.send(`${command}:{${x}px}`);
-    //             break
-    //         }
-    //         case 'mouse_position': {
-    //             ws.send(`mouse_position ${x},${y}`);
-    //             break
-    //         }
-    //         default: {
-    //             ws.send(`unknown_command_${command}`);
-    //             break
-    //         }
-    //     }
-
-    // });
 
 });
 
