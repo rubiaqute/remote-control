@@ -1,12 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
-import Jimp from 'jimp';
 import robot from 'robotjs';
 import { WebSocketServer, createWebSocketStream } from 'ws';
 import { drawCircle } from './circle';
 import { drawRectangle } from './rectangle';
-
+import { printScreen } from './print-screen';
 
 
 export const httpServer = http.createServer(function (req, res) {
@@ -29,7 +28,7 @@ wss.on('connection', (ws: WebSocketServer) => {
     const wsStream = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false })
     wsStream.write(`WS_params:${JSON.stringify(ws._socket.address())}`)
 
-    wsStream.on('data', (data: string) => {
+    wsStream.on('data', async (data: string) => {
         const command = data.split(' ')[0]
         const distance = +data.split(' ')[1]
 
@@ -75,6 +74,11 @@ wss.on('connection', (ws: WebSocketServer) => {
                 const length = +data.split(' ')[2]
                 drawRectangle(distance, length)
                 wsStream.write(`${command}`);
+                break
+            }
+            case 'prnt_scrn': {
+                const print = await printScreen()
+                wsStream.write(`${command} ${print.split(',')[1]}`);
                 break
             }
             default: {
