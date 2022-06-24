@@ -4,6 +4,9 @@ import * as http from 'http';
 import Jimp from 'jimp';
 import robot from 'robotjs';
 import { WebSocketServer, createWebSocketStream } from 'ws';
+import { drawCircle } from './circle';
+import { drawRectangle } from './rectangle';
+
 
 
 export const httpServer = http.createServer(function (req, res) {
@@ -55,7 +58,23 @@ wss.on('connection', (ws: WebSocketServer) => {
                 break
             }
             case 'mouse_position': {
-                wsStream.write(`mouse_position ${x},${y}`);
+                wsStream.write(`${command} ${x},${y}`);
+                break
+            }
+            case 'draw_circle': {
+                drawCircle(distance)
+                wsStream.write(`${command}`);
+                break
+            }
+            case 'draw_square': {
+                drawRectangle(distance)
+                wsStream.write(`${command}`);
+                break
+            }
+            case 'draw_rectangle': {
+                const length = +data.split(' ')[2]
+                drawRectangle(distance, length)
+                wsStream.write(`${command}`);
                 break
             }
             default: {
