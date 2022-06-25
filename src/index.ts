@@ -1,6 +1,4 @@
-import Jimp from 'jimp';
-import { httpServer } from './src/http_server/index';
-import robot from 'robotjs';
+import { httpServer } from './http_server/index';
 
 const HTTP_PORT = 3000;
 

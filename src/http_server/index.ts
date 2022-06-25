@@ -38,22 +38,22 @@ wss.on('connection', (ws: WebSocketServer) => {
         switch (command) {
             case 'mouse_up': {
                 robot.moveMouseSmooth(x, y - distance);
-                wsStream.write(`${command}:{${y}px}`);
+                wsStream.write(`${command}`);
                 break
             }
             case 'mouse_down': {
                 robot.moveMouseSmooth(x, y + distance);
-                wsStream.write(`${command}:{${y}px}`);
+                wsStream.write(`${command}`);
                 break
             }
             case 'mouse_left': {
                 robot.moveMouseSmooth(x - distance, y);
-                wsStream.write(`${command}:{${x}px}`);
+                wsStream.write(`${command}`);
                 break
             }
             case 'mouse_right': {
                 robot.moveMouseSmooth(x + distance, y);
-                wsStream.write(`${command}:{${x}px}`);
+                wsStream.write(`${command}`);
                 break
             }
             case 'mouse_position': {
@@ -87,8 +87,6 @@ wss.on('connection', (ws: WebSocketServer) => {
             }
         }
     })
-
-
 
 });
 
