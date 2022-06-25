@@ -6,6 +6,7 @@ import { WebSocketServer, createWebSocketStream } from 'ws';
 import { drawCircle } from './circle';
 import { drawRectangle } from './rectangle';
 import { printScreen } from './print-screen';
+import { logger, loggerStatus } from './loggers';
 
 
 export const httpServer = http.createServer(function (req, res) {
@@ -34,59 +35,73 @@ wss.on('connection', (ws: WebSocketServer) => {
 
         const { x, y } = robot.getMousePos()
         robot.setMouseDelay(100)
-
-        switch (command) {
-            case 'mouse_up': {
-                robot.moveMouseSmooth(x, y - distance);
-                wsStream.write(`${command}`);
-                break
+        try {
+            logger(command)
+            switch (command) {
+                case 'mouse_up': {
+                    robot.moveMouseSmooth(x, y - distance);
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'mouse_down': {
+                    robot.moveMouseSmooth(x, y + distance);
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'mouse_left': {
+                    robot.moveMouseSmooth(x - distance, y);
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'mouse_right': {
+                    robot.moveMouseSmooth(x + distance, y);
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'mouse_position': {
+                    wsStream.write(`${command} ${x},${y}`);
+                    break
+                }
+                case 'draw_circle': {
+                    drawCircle(distance)
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'draw_square': {
+                    drawRectangle(distance)
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'draw_rectangle': {
+                    const length = +data.split(' ')[2]
+                    drawRectangle(distance, length)
+                    wsStream.write(`${command}`);
+                    break
+                }
+                case 'prnt_scrn': {
+                    const print = await printScreen()
+                    wsStream.write(`${command} ${print.split(',')[1]}`);
+                    break
+                }
+                default: {
+                    wsStream.write(`unknown_command_${command}`);
+                    break
+                }
             }
-            case 'mouse_down': {
-                robot.moveMouseSmooth(x, y + distance);
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'mouse_left': {
-                robot.moveMouseSmooth(x - distance, y);
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'mouse_right': {
-                robot.moveMouseSmooth(x + distance, y);
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'mouse_position': {
-                wsStream.write(`${command} ${x},${y}`);
-                break
-            }
-            case 'draw_circle': {
-                drawCircle(distance)
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'draw_square': {
-                drawRectangle(distance)
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'draw_rectangle': {
-                const length = +data.split(' ')[2]
-                drawRectangle(distance, length)
-                wsStream.write(`${command}`);
-                break
-            }
-            case 'prnt_scrn': {
-                const print = await printScreen()
-                wsStream.write(`${command} ${print.split(',')[1]}`);
-                break
-            }
-            default: {
-                wsStream.write(`unknown_command_${command}`);
-                break
-            }
+            loggerStatus(true)
+        } catch {
+            loggerStatus(false)
         }
     })
+    wsStream.on('close', () => {
+        wsStream.end()
+    }
+    )
 
 });
 
+process.on("SIGINT", () => {
+    console.log('Bye-bye')
+    wss.close()
+    process.exit()
+});
